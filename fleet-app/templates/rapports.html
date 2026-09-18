@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Rapports de consommation{% endblock %}
+{% block corps %}
+<section class="carte">
+  <h2>Rapport de consommation</h2>
+  <form method="get" action="{{ url_for('pages.pages_rapports') }}" class="filtres">
+    <label>Du <input type="date" name="debut" value="{{ filtres.debut }}"></label>
+    <label>Au <input type="date" name="fin" value="{{ filtres.fin }}"></label>
+    <label>Mois <input type="number" name="mois" min="1" max="12" value="{{ filtres.mois }}"></label>
+    <label>Année <input type="number" name="annee" min="2024" value="{{ filtres.annee }}"></label>
+    <button type="submit">Appliquer</button>
+  </form>
+</section>
+
+<section class="carte">
+  <h2>Consommations par service</h2>
+  <canvas id="graphiqueServices" height="120"></canvas>
+  <table class="table">
+    <thead><tr><th>Service</th><th>Litres</th><th>Bons</th></tr></thead>
+    <tbody>
+      {% for item in par_service %}
+      <tr><td>{{ item.service }}</td><td class="qte">{{ item.litres }}</td><td>{{ item.bons }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="carte">
+  <h2>Synthèse mensuelle — {{ rapport.periode }}</h2>
+  <table class="table">
+    <thead><tr><th>Période</th><th>Total litres</th><th>Total bons</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>{{ rapport.periode }}</td>
+        <td class="qte">{{ rapport.total_litres }}</td>
+        <td>{{ rapport.total_bons }}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+<script>
+  const donnees = {{ par_service | tojson }};
+  new Chart(document.getElementById('graphiqueServices'), {
+    type: 'bar',
+    data: {
+      labels: donnees.map(d => d.service),
+      datasets: [{
+        label: 'Consommation (litres)',
+        data: donnees.map(d => d.litres),
+        backgroundColor: 'rgba(15, 76, 129, 0.75)',
+        borderColor: '#0f4c81',
+        borderWidth: 1,
+      }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+</script>
+{% endblock %}

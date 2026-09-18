@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord du parc{% endblock %}
+{% block corps %}
+<section class="carte">
+  <h2>Tableau de bord du parc</h2>
+  <div class="compteurs">
+    <div class="compteur">
+      <span class="valeur">{{ synthese.total }}</span>
+      <span class="legende">Véhicules</span>
+    </div>
+    <div class="compteur">
+      <span class="valeur">{{ synthese.en_service }}</span>
+      <span class="legende">En service</span>
+    </div>
+    <div class="compteur danger">
+      <span class="valeur">{{ synthese.en_maintenance }}</span>
+      <span class="legende">En maintenance / hors service</span>
+    </div>
+    <div class="compteur alerte">
+      <span class="valeur">{{ synthese.alertes_maintenance }}</span>
+      <span class="legende">Alertes de maintenance</span>
+    </div>
+  </div>
+</section>
+
+<section class="carte">
+  <h2>État des véhicules du parc municipal</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Immatriculation</th>
+        <th>Marque</th>
+        <th>Modèle</th>
+        <th>Service affectataire</th>
+        <th>Carburant</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vehicule in vehicules %}
+      <tr>
+        <td class="imm">{{ vehicule.immatriculation }}</td>
+        <td>{{ vehicule.marque }}</td>
+        <td>{{ vehicule.modele }}</td>
+        <td>{{ vehicule.service }}</td>
+        <td>{{ vehicule.carburant }}</td>
+        <td><span class="statut {{ vehicule.statut|lower|replace(' ', '-') }}">{{ vehicule.statut }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="carte">
+  <h2>Alertes de maintenance récentes</h2>
+  {% if alertes %}
+  <table class="table">
+    <thead>
+      <tr><th>Niveau</th><th>Source</th><th>Description</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for alerte in alertes %}
+      <tr>
+        <td><span class="niveau{{ alerte.niveau }}">{{ alerte.niveau }}</span></td>
+        <td>{{ alerte.source }}</td>
+        <td>{{ alerte.description }}</td>
+        <td>{{ alerte.timestamp }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="vide">Aucune alerte ouverte.</p>
+  {% endif %}
+</section>
+{% endblock %}

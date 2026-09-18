@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Administration — utilisateurs et rôles{% endblock %}
+{% block corps %}
+<section class="carte">
+  <h2>Utilisateurs de l'annuaire</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Identifiant</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Rôles</th><th>Statut</th></tr>
+    </thead>
+    <tbody>
+      {% for utilisateur in utilisateurs %}
+      <tr>
+        <td class="imm">{{ utilisateur.uid }}</td>
+        <td>{{ utilisateur.nom }}</td>
+        <td>{{ utilisateur.prenom }}</td>
+        <td>{{ utilisateur.email }}</td>
+        <td>{{ utilisateur.roles|join(', ') }}</td>
+        <td><span class="statut {{ utilisateur.statut }}">{{ utilisateur.statut }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="carte">
+  <h2>Rôles et niveau d'accès</h2>
+  <table class="table">
+    <thead><tr><th>Rôle</th><th>Niveau d'accès</th></tr></thead>
+    <tbody>
+      {% for role in roles %}
+      <tr><td>{{ role.libelle }}</td><td>{{ role.niveau_acces }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="carte">
+  <h2>Certificats émis par la CA interne</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Sujet</th><th>Autorité</th><th>Émission</th><th>Expiration</th><th>État</th></tr>
+    </thead>
+    <tbody>
+      {% for certificat in certificats %}
+      <tr>
+        <td class="imm">{{ certificat.sujet }}</td>
+        <td>{{ certificat.autorite }}</td>
+        <td>{{ certificat.date_emission }}</td>
+        <td>{{ certificat.date_expiration }}</td>
+        <td><span class="statut {{ certificat.etat }}">{{ certificat.etat }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="vide">Aucun certificat enregistré localement.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

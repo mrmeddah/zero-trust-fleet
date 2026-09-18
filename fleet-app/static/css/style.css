@@ -1,0 +1,159 @@
+/* ==========================================================================
+   Application de gestion du parc et du carburant — Commune d'El Kelaâ des Sraghna
+   Palette EMSI : bleu #0f4c81, or #c9a227
+   ========================================================================== */
+:root {
+  --bleu: #0f4c81;
+  --bleu-fonce: #0b3a63;
+  --or: #c9a227;
+  --gris-fond: #f3f5f7;
+  --gris-texte: #2c3e50;
+  --danger: #c0392b;
+  --succes: #1e8449;
+  --alerte: #b9770e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--gris-fond);
+  color: var(--gris-texte);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.entete {
+  background: linear-gradient(90deg, var(--bleu), var(--bleu-fonce));
+  color: #fff;
+  padding: 14px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.entete-titre { display: flex; align-items: center; gap: 14px; }
+.logo {
+  background: var(--or);
+  color: var(--bleu-fonce);
+  font-weight: 800;
+  font-size: 22px;
+  width: 42px; height: 42px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.entete h1 { margin: 0; font-size: 18px; }
+.entete p { margin: 0; font-size: 12px; opacity: .85; }
+
+.nav { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.nav a { color: #fff; text-decoration: none; font-weight: 600; padding: 6px 10px; border-radius: 6px; }
+.nav a:hover { background: rgba(255,255,255,.15); }
+.session { font-size: 13px; opacity: .9; }
+.session em { display: block; font-style: normal; font-size: 11px; color: var(--or); }
+.deconnexion { background: rgba(255,255,255,.12); }
+
+.corps { flex: 1; width: 100%; max-width: 1150px; margin: 0 auto; padding: 24px; }
+
+.carte {
+  background: #fff;
+  border: 1px solid #dfe3e8;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 22px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.carte h2 {
+  margin: 0 0 16px;
+  color: var(--bleu);
+  font-size: 18px;
+  border-bottom: 2px solid var(--gris-fond);
+  padding-bottom: 10px;
+}
+
+/* --- Compteurs du tableau de bord --- */
+.compteurs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+.compteur {
+  border: 1px solid #e2e6ea;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  background: #fafbfc;
+}
+.compteur .valeur { display: block; font-size: 34px; font-weight: 800; color: var(--bleu); }
+.compteur .legende { font-size: 12px; color: #68788a; }
+.compteur.danger .valeur { color: var(--danger); }
+.compteur.alerte .valeur { color: var(--alerte); }
+
+/* --- Tableaux --- */
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td {
+  border: 1px solid #e2e6ea;
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 14px;
+}
+.table thead th { background: var(--bleu); color: #fff; font-weight: 600; }
+.table tbody tr:nth-child(even) { background: #f8fafc; }
+.imm { font-family: "Consolas", monospace; font-weight: 600; }
+.qte { font-weight: 700; color: var(--bleu); text-align: right; }
+.vide { color: #98a6b3; text-align: center; font-style: italic; }
+
+.statut { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #fff; }
+.statut.en-service, .statut.actif, .statut.valid, .statut.valide { background: var(--succes); }
+.statut.en-maintenance, .statut.ouverte { background: var(--alerte); }
+.statut.hors-service, .statut.suspendu, .statut.revoked { background: var(--danger); }
+.statut.expired { background: #7f8c8d; }
+
+.niveau5 { color: var(--danger); font-weight: 800; }
+.niveau4 { color: var(--alerte); font-weight: 700; }
+.niveau3 { color: var(--or); font-weight: 700; }
+
+/* --- Connexion --- */
+.connexion { max-width: 460px; margin: 40px auto; }
+.cert-ok { background: #eafaf1; border: 1px solid #d5f5e3; color: var(--succes); padding: 10px; border-radius: 8px; font-size: 13px; }
+.cert-info { background: #eaf2fb; border: 1px solid #d6e6f8; color: var(--bleu); padding: 10px; border-radius: 8px; font-size: 13px; }
+.note-securite { font-size: 12px; color: #8494a5; }
+
+form label { display: block; margin: 12px 0 4px; font-size: 13px; font-weight: 600; color: #4a5a6a; }
+form input, form select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #ccd6e0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+form input:focus, form select:focus { outline: 2px solid var(--or); border-color: transparent; }
+button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 11px;
+  background: var(--bleu);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover { background: var(--bleu-fonce); }
+
+.filtres { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+.filtres label { margin: 0; }
+.filtres input, .filtres select { width: auto; }
+.filtres button { width: auto; margin: 0; padding: 9px 18px; }
+
+.flash { padding: 11px 14px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; font-size: 14px; }
+.flash.erreur { background: #fdecea; color: var(--danger); border: 1px solid #f5c6bc; }
+.flash.succes { background: #eafaf1; color: var(--succes); border: 1px solid #d5f5e3; }
+
+.pied {
+  background: var(--bleu-fonce);
+  color: rgba(255,255,255,.75);
+  text-align: center;
+  padding: 12px;
+  font-size: 12px;
+}

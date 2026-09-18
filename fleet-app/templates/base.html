@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Gestion du parc et du carburant{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="entete">
+    <div class="entete-titre">
+      <span class="logo">E</span>
+      <div>
+        <h1>Commune d'El Kelaâ des Sraghna</h1>
+        <p>Gestion du parc et du carburant — Architecture Zero Trust</p>
+      </div>
+    </div>
+    {% if utilisateur %}
+    <nav class="nav">
+      <a href="{{ url_for('pages.pages_fleet') }}">Parc</a>
+      <a href="{{ url_for('pages.pages_fuel') }}">Carburant</a>
+      <a href="{{ url_for('pages.pages_rapports') }}">Rapports</a>
+      {% if 'Administrateur' in utilisateur.roles %}
+      <a href="{{ url_for('pages.pages_admin') }}">Administration</a>
+      {% endif %}
+      <span class="session">
+        {{ utilisateur.prenom }} {{ utilisateur.nom }}
+        <em>{{ utilisateur.roles|join(', ') }}</em>
+      </span>
+      <a href="{{ url_for('pages.pages_logout') }}" class="deconnexion">Déconnexion</a>
+    </nav>
+    {% endif %}
+  </header>
+
+  <main class="corps">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for categorie, message in messages %}
+        <div class="flash {{ categorie }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block corps %}{% endblock %}
+  </main>
+
+  <footer class="pied">
+    <p>Application de gestion du parc et du carburant — Année universitaire 2025/2026</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Bons de carburant{% endblock %}
+{% block corps %}
+<section class="carte">
+  <h2>Émission d'un bon de carburant</h2>
+  <form method="post" action="{{ url_for('pages.pages_fuel') }}" class="form-bon">
+    <label for="vehicule_id">Véhicule</label>
+    <select id="vehicule_id" name="vehicule_id" required>
+      <option value="">-- Sélectionner un véhicule --</option>
+      {% for vehicule in vehicules %}
+      <option value="{{ vehicule.id }}">{{ vehicule.immatriculation }} — {{ vehicule.marque }} ({{ vehicule.service }})</option>
+      {% endfor %}
+    </select>
+
+    <label for="type_carburant">Type de carburant</label>
+    <select id="type_carburant" name="type_carburant" required>
+      {% for stock in stocks %}
+      <option value="{{ stock.type_carburant }}">{{ stock.type_carburant }} (stock : {{ stock.quantite }} l)</option>
+      {% endfor %}
+    </select>
+
+    <label for="quantite">Quantité (litres)</label>
+    <input type="number" id="quantite" name="quantite" min="1" step="0.1" required>
+
+    <label for="numero_bon">Numéro du bon (optionnel)</label>
+    <input type="text" id="numero_bon" name="numero_bon" placeholder="BON-AAAAJJJJ-0001">
+
+    <button type="submit">Valider le bon</button>
+  </form>
+</section>
+
+<section class="carte">
+  <h2>Bons de carburant émis</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>N° bon</th>
+        <th>Date</th>
+        <th>Véhicule</th>
+        <th>Agent émetteur</th>
+        <th>Carburant</th>
+        <th>Quantité (l)</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bon in bons %}
+      <tr>
+        <td class="imm">{{ bon.numero_bon }}</td>
+        <td>{{ bon.date_emission }}</td>
+        <td>{{ bon.vehicule }}</td>
+        <td>{{ bon.utilisateur or '—' }}</td>
+        <td>{{ bon.type_carburant }}</td>
+        <td class="qte">{{ bon.quantite }}</td>
+        <td><span class="statut {{ bon.statut }}">{{ bon.statut }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="vide">Aucun bon émis.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="carte">
+  <h2>Niveau des stocks</h2>
+  <table class="table">
+    <thead><tr><th>Carburant</th><th>Stock disponible (litres)</th></tr></thead>
+    <tbody>
+      {% for stock in stocks %}
+      <tr><td>{{ stock.type_carburant }}</td><td class="qte">{{ stock.quantite }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
