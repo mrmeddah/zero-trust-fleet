@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+
+# Base de donnees (generee par fleet-app/database/seed.py)
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets
+.env
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+azure
+azure.pub
+secrets/
+
+# Certificats Wazuh / Filebeat generes
+fleet-app/config/certs/
+
+# VM et ISO (ce projet n embarque pas de machines virtuelles)
+*.qcow2
+*.img
+*.iso
+*.vmdk
+
+# Outils d agent
+.opencode/
+node_modules/
+
+# Fichiers LaTeX compiles
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+missfont.log
+*.fls
+*.fdb_latexmk
+
+# Systeme
+.DS_Store
+Thumbs.db
+*.swp

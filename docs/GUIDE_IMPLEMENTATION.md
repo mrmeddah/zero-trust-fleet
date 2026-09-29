@@ -349,8 +349,8 @@ sudo dnf -y install ipa-server ipa-server-dns
 sudo ipa-server-install \
   --realm MUNICIPAL.LOCAL \
   --domain municipal.local \
-  --ds-password 'MotDePasse@123' \
-  --admin-password 'MotDePasseAdmin@123' \
+  --ds-password "$IPA_DS_PASSWORD" \
+  --admin-password "$IPA_ADMIN_PASSWORD" \
   --setup-dns --auto-forwarders --no-ntp
 sudo systemctl enable --now ipa
 kinit admin

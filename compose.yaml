@@ -1,0 +1,167 @@
+name: pfa-zero-trust-fleet
+
+services:
+
+  # ---------------------------------------------------------------- Wazuh
+  wazuh-indexer:
+    image: wazuh/wazuh-indexer:4.14.8
+    container_name: pfa-wazuh-indexer
+    hostname: wazuh.indexer
+    restart: unless-stopped
+    environment:
+      INDEXER_URL: https://wazuh.indexer:9200
+      INDEXER_USERNAME: ${WAZUH_INDEXER_USER:-admin}
+      INDEXER_PASSWORD: ${WAZUH_INDEXER_PASSWORD:?mot de passe indexer requis dans .env}
+      INDEXER_TLS_CONFIGDIR: /usr/share/wazuh-indexer/certs
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile:  { soft: 65536, hard: 65536 }
+    volumes:
+      - wazuh-indexer-certs:/usr/share/wazuh-indexer/certs
+    networks:
+      zero-trust:
+        ipv4_address: 172.16.200.10
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sk -u ${WAZUH_INDEXER_USER:-admin}:${WAZUH_INDEXER_PASSWORD} https://localhost:9200/_cluster/health | grep -qE '\"status\":\"(green|yellow)\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 40
+      start_period: 90s
+
+  wazuh-manager:
+    image: wazuh/wazuh-manager:4.14.8
+    container_name: pfa-wazuh-manager
+    hostname: wazuh.manager
+    restart: unless-stopped
+    environment:
+      INDEXER_URL: https://wazuh.indexer:9200
+      INDEXER_USERNAME: ${WAZUH_INDEXER_USER:-admin}
+      INDEXER_PASSWORD: ${WAZUH_INDEXER_PASSWORD:?mot de passe indexer requis dans .env}
+      FILEBEAT_SSL_VERIFICATION_MODE: ${FILEBEAT_SSL_VERIFICATION_MODE:-none}
+    volumes:
+      - wazuh-manager-api:/var/ossec/api/configuration
+      - wazuh-manager-etc:/var/ossec/etc
+      - wazuh-manager-var:/var/ossec/var
+      - wazuh-agent-logs:/var/log
+    ports:
+      - "1514:1514/udp"   # agents
+      - "514:514/udp"     # syslog
+      - "514:514/tcp"     # syslog TCP
+    depends_on:
+      wazuh-indexer:
+        condition: service_healthy
+    networks:
+      zero-trust:
+        ipv4_address: 172.16.200.20
+    healthcheck:
+      test: ["CMD-SHELL", "/var/ossec/bin/wazuh-control status | grep -q 'wazuh-remoted is running'"]
+      interval: 20s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+
+  wazuh-dashboard:
+    image: wazuh/wazuh-dashboard:4.14.8
+    container_name: pfa-wazuh-dashboard
+    hostname: wazuh.dashboard
+    restart: unless-stopped
+    environment:
+      INDEXER_URL: https://wazuh.indexer:9200
+      DASHBOARD_USERNAME: ${WAZUH_DASHBOARD_USER:-admin}
+      DASHBOARD_PASSWORD: ${WAZUH_DASHBOARD_PASSWORD:?mot de passe dashboard requis dans .env}
+      SERVER_SSL_ENABLED: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms1g -Xmx1g
+    volumes:
+      - wazuh-dashboard-certs:/usr/share/wazuh-dashboard/certs
+    ports:
+      - "5601:5601"
+    depends_on:
+      wazuh-indexer:
+        condition: service_healthy
+    networks:
+      zero-trust:
+        ipv4_address: 172.16.200.30
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sk https://localhost:5601/ | grep -qi 'wazuh-dashboard'"]
+      interval: 20s
+      timeout: 10s
+      retries: 20
+      start_period: 90s
+
+  # ---------------------------------------------------------- Application
+  fleet-app:
+    build:
+      context: ./fleet-app
+      dockerfile: Dockerfile
+    container_name: pfa-fleet-app
+    hostname: fleet-app.municipal.local
+    restart: unless-stopped
+    environment:
+      FLEET_SECRET_KEY: ${FLEET_SECRET_KEY:?FLEET_SECRET_KEY requis dans .env}
+      FLEET_DB_URI: sqlite:////data/fleet.db
+      FLEET_FREEIPA_MODE: ${FLEET_FREEIPA_MODE:-disabled}
+      FLEET_FREEIPA_HOST: ${FLEET_FREEIPA_HOST:-freeipa}
+      FLEET_FREEIPA_PORT: ${FLEET_FREEIPA_PORT:-389}
+      FLEET_SIEM_HOST: wazuh.manager
+      FLEET_SIEM_PORT: "514"
+      TZ: ${TZ:-UTC}
+    volumes:
+      - fleet-app-data:/data
+    ports:
+      - "5000:5000"
+    depends_on:
+      wazuh-manager:
+        condition: service_started
+    networks:
+      zero-trust:
+        ipv4_address: 172.16.200.40
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:5000/login | grep -qi 'form'"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  # ------------------------------------------------------------- Annuaire
+  # FreeIPA est optionnel. Son initialisation est lente et peut echouer en
+  # environnement contraint ; par defaut l'application utilise sa base locale.
+  #   podman compose --profile freeipa up -d
+  freeipa:
+    image: ${FREEIPA_IMAGE:-freeipa/freeipa-server:4.12}
+    container_name: pfa-freeipa
+    hostname: freeipa.municipal.local
+    restart: unless-stopped
+    profiles: ["freeipa"]
+    environment:
+      IPA_DOMAIN: ${IPA_DOMAIN:-municipal.local}
+      IPA_REALM: ${IPA_REALM:-MUNICIPAL.LOCAL}
+      IPA_ADMIN_PASSWORD: ${IPA_ADMIN_PASSWORD:?IPA_ADMIN_PASSWORD requis dans .env}
+      IPA_DS_PASSWORD: ${IPA_DS_PASSWORD:?IPA_DS_PASSWORD requis dans .env}
+      IPA_SERVER_IP: 172.16.200.50
+    privileged: true
+    cap_add: [SYS_ADMIN, SYS_RESOURCE, CHOWN, DAC_OVERRIDE, FOWNER]
+    ports:
+      - "389:389/tcp"
+      - "636:636/tcp"
+      - "443:443/tcp"
+      - "88:88/udp"
+    networks:
+      zero-trust:
+        ipv4_address: 172.16.200.50
+
+networks:
+  zero-trust:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.200.0/24
+          gateway: 172.16.200.1
+
+volumes:
+  wazuh-indexer-certs:
+  wazuh-manager-api:
+  wazuh-manager-etc:
+  wazuh-manager-var:
+  wazuh-agent-logs:
+  wazuh-dashboard-certs:
+  fleet-app-data:

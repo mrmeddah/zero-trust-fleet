@@ -1,9 +1,11 @@
 """Configuration de l'application de gestion du parc et du carburant.
 
-Mode développement : application exécutée sur l'hôte, joignant FreeIPA
-directement (10.10.10.10, pont vlan10 de la machine hôte).
-Mode production (infra) : application exécutée sur la VM Azure, derrière
-le tunnel WireGuard (10.99.0.2:5000).
+La configuration provient entierement de l'environnement, ce qui permet de
+faire tourner la meme image en local, en CI ou en conteneur :
+  - developpement  : base SQLite locale, annuaire desactive
+  - conteneurise   : variables posees par compose.yaml
+  - production     : chaines de connexion explicites, secrets hors depot
+
 """
 import os
 

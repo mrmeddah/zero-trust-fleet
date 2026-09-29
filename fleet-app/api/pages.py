@@ -11,7 +11,7 @@ from flask import (Blueprint, render_template, request, redirect, url_for,
 
 from models import (db, Utilisateur, Role, Certificat, Vehicule, Alerte,
                     BonCarburant, Stock, JournalAcces)
-from services.parc import journaliser, synthese_parc
+from services.parc import journaliser, synthese_parc, alerter_wazuh
 from services.carburant import lister_bons
 from services.rapports import rapport_mensuel, consommation_par_service
 from services.security import AnnuaireClient, MtlsError, verification_mtls
@@ -83,6 +83,7 @@ def pages_login():
             valide = (utilisateur.mot_de_passe == mot_de_passe)
 
         if utilisateur is None or not valide or utilisateur.statut != "actif":
+            alerter_wazuh("AUTHFAIL", user=uid, src=request.remote_addr, path="/login")
             flash("Identifiants invalides ou accès refusé.", "erreur")
             return render_template("login.html", cert_cn=_cert_cn()), 401
 
