@@ -1,4 +1,4 @@
-"""/api/vehicules --- gestion du parc (tb:ch3-endpoints)."""
+"""/api/vehicules --- gestion du parc."""
 from flask import Blueprint, request, jsonify
 
 from services.parc import lister_vehicules, detailler_vehicule, creer_vehicule

@@ -1,5 +1,5 @@
 """Pages web servies par Flask (templates Jinja2) — routes alignées sur le
-chapitre III : /login, /fleet, /fuel, /rapports, /admin.
+Pages : /login, /fleet, /fuel, /rapports, /admin.
 
 Les routes /fleet et /fuel sont volontairement nommées ainsi afin de
 correspondre à la règle de détection Wazuh 100001 (<url>/fuel|/fleet</url>).
@@ -48,7 +48,7 @@ def exiger_certificat():
 
 @api.after_app_request
 def journaliser_requete(reponse):
-    """Journalisation structurée de toutes les requêtes (tb:ch4-logs)."""
+    """Journalisation structurée de toutes les requêtes."""
     if request.endpoint and not request.endpoint.startswith("static"):
         utilisateur = session.get("utilisateur")
         if utilisateur:

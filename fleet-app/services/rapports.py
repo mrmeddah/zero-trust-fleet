@@ -1,4 +1,4 @@
-"""Couche métier --- rapports de consommation (fig:ch4-app-rapport).
+"""Couche métier --- rapports de consommation.
 
 Synthèse par véhicule, par service et par période ; tableau mensuel.
 """

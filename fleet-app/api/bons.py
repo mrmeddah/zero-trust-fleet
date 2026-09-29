@@ -1,4 +1,4 @@
-"""/api/bons --- bons de carburant et mouvements de stock (tb:ch3-endpoints)."""
+"""/api/bons --- bons de carburant et mouvements de stock."""
 from flask import Blueprint, request, jsonify
 
 from services.carburant import lister_bons, creer_bon

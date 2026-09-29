@@ -1,80 +1,81 @@
-# PFA — Zero Trust pour un parc de véhicules municipal
+# Zero Trust Fleet — Municipal Fleet Management
 
-Laboratoire de démonstration d'une architecture Zero Trust appliquée à la gestion
-d'un parc communal : une application métier **fleet-app** autentifiée, un SIEM
-**Wazuh** qui corréle les échecs d'authentification, et un annuaire d'entreprise.
+A reproducible lab demonstrating a Zero Trust architecture applied to municipal
+fleet management: an authenticated **fleet-app** business application, a **Wazuh**
+SIEM that correlates authentication failures, and an optional enterprise
+directory.
 
-Le dépôt a **un seul objectif : être reproductible.** Un poste compatible, un
-script, et le laboratoire complet tourne. Rien n'est laissé à linterpretation.
+The repository has **one goal: reproducibility.** Any compatible machine, one
+script, and the whole lab runs. Nothing is left to interpretation.
 
 ```bash
-git clone https://github.com/<vous>/pfa-zero-trust-fleet.git
-cd pfa-zero-trust-fleet
+git clone https://github.com/<you>/zero-trust-fleet.git
+cd zero-trust-fleet
 cp .env.example .env
 ./scripts/up.sh
 ```
 
-`up.sh` génère les secrets, construit l'image de l'application, démarre la pile,
-attend que l'indexer réponde et injecte les règles de corrélation du projet.
+`up.sh` generates the secrets, builds the application image, starts the stack,
+waits for the indexer to answer, and injects the project's correlation rules.
 
 ---
 
-## Ce que remonte le laboratoire
+## What the lab brings up
 
-| Service | Rôle | Port local | État |
+| Service | Role | Local port | State |
 |---|---|---|---|
-| `wazuh-indexer` | Index et moteur de recherche des alertes | — (interne) | requis |
-| `wazuh-manager` | Réception syslog, décodeurs, règles, Filebeat | 514, 1514/udp | requis |
-| `wazuh-dashboard` | Interface web SIEM | https://127.0.0.1:5601 | requis |
-| `fleet-app` | Application Flask de gestion du parc | http://127.0.0.1:5000 | requis |
-| `freeipa` | Annuaire LDAP/Kerberos | https://127.0.0.1/ipa/ | optionnel |
+| `wazuh-indexer` | Alert index and search engine | — (internal) | required |
+| `wazuh-manager` | Syslog intake, decoders, rules, Filebeat | 514, 1514/udp | required |
+| `wazuh-dashboard` | SIEM web interface | https://127.0.0.1:5601 | required |
+| `fleet-app` | Flask fleet management application | http://127.0.0.1:5000 | required |
+| `freeipa` | LDAP/Kerberos directory | https://127.0.0.1/ipa/ | optional |
 
-L'annuaire FreeIPA est **facultatif** et désactivé par défaut :
+The FreeIPA directory is **optional** and disabled by default:
 
 ```bash
 ./scripts/up.sh --freeipa
 ```
 
-Son initialisation demande plusieurs minutes et échoue fréquemment en
-environnement contraint. Sans lui, l'application s'autentifie sur sa base
-locale : toute la démonstration de supervision fonctionne quand même.
+Its initialisation takes several minutes and often fails in constrained
+environments. Without it the application authenticates against its local
+database, and the full monitoring demonstration still works.
 
-> **Utilisez toujours `127.0.0.1` et non `localhost`.** Podman publie les ports
-> en IPv4 ; sur un poste où `localhost` résout d'abord en `::1`, la connexion
-> échoue sans message d'erreur clair.
+> **Always use `127.0.0.1`, not `localhost`.** Podman publishes ports over IPv4;
+> on hosts where `localhost` resolves to `::1` first, the connection fails with
+> no clear error message.
 
-## Prérequis
+## Requirements
 
-- Linux, 8 Go de RAM libres, 4 Go de disque
+- Linux, 8 GB RAM free, 4 GB disk
 - `podman` ≥ 4
-- le provider compose : Debian/Ubuntu `sudo apt install podman-compose`
-- `curl` (utilisé par les contrôles de santé)
+- the compose provider: Debian/Ubuntu `sudo apt install podman-compose`
+- `curl` (used by the health checks)
 
-Docker fonctionne aussi : remplacez `podman compose` par `docker compose` dans
-`scripts/up.sh`, `scripts/verify.sh` et `scripts/down.sh`.
+Docker also works: replace `podman compose` with `docker compose` in
+`scripts/up.sh`, `scripts/verify.sh` and `scripts/down.sh`.
 
-## Commandes
+## Commands
 
-| Commande | Effet |
+| Command | Effect |
 |---|---|
-| `./scripts/up.sh` | Remonte tout, injecte la configuration Wazuh |
-| `./scripts/verify.sh` | Contrôle de santé, code de sortie 0 ou 1 |
-| `./scripts/down.sh` | Arrête, conserve les volumes |
-| `./scripts/down.sh --purge` | Arrête et efface toutes les données |
+| `./scripts/up.sh` | Brings everything up, injects the Wazuh configuration |
+| `./scripts/verify.sh` | Health check, exits 0 or 1 |
+| `./scripts/down.sh` | Stops, keeps the volumes |
+| `./scripts/down.sh --purge` | Stops and erases all data |
 
-## La chaîne de démonstration
+## The demonstration chain
 
-C'est le cœur du projet : une tentative de connexion échouée dans l'application
-devient une alerte corrélée dans le tableau de bord Wazuh.
+This is the core of the project: a failed login in the application becomes a
+correlated alert in the Wazuh dashboard.
 
 ```
 fleet-app  ──syslog UDP 514──▶  wazuh-manager  ──Filebeat/HTTPS──▶  wazuh-indexer  ──▶  dashboard
-  échec de login                 règle 100000                      recherche
-                                 corrélation 100002
-                                 (5 échecs / 60 s)
+  failed login                 rule 100000                      search
+                              correlation 100002
+                              (5 failures / 60 s)
 ```
 
-Pour la déclencher :
+Trigger it with:
 
 ```bash
 for i in $(seq 1 6); do
@@ -83,82 +84,65 @@ for i in $(seq 1 6); do
 done
 ```
 
-La sixième requête franchit le seuil. Cherchez `poc` ou
-`authentication_failures` dans le tableau de bord.
+The sixth request crosses the threshold. Search for `poc` or
+`authentication_failures` in the dashboard.
 
-### Les deux règles
+### The two rules
 
-`scripts/configure-wazuh.sh` injecte deux règles dans
+`scripts/configure-wazuh.sh` injects two rules into
 `/var/ossec/etc/rules/local_rules.xml`.
 
-`100000` transforme un `AUTHFAIL` émis par l'application en événement
-sécuritifique de niveau 5.
+`100000` turns an `AUTHFAIL` emitted by the application into a level 5 security
+event.
 
-`100002` corrèle **5 occurrences en moins de 60 secondes** sur le champ `user`
-et déclenche au niveau 10.
+`100002` correlates **5 occurrences within 60 seconds** on the `user` field and
+triggers at level 10.
 
-Cette règle ne contient volontairement **pas** `<same_source_ip/>`. En
-conteneurisé, tous les événements de l'application parviennent au manager avec
-l'adresse de la boucle locale : filtrer sur l'adresse IP ferait échouer la
-corrélation.
+This rule deliberately carries **no** `<same_source_ip/>`. In containerised form
+all application events reach the manager with the loopback address, so
+filtering on IP would break the correlation.
 
-## Identifiants
+## Credentials
 
-Les secrets sont générés par `up.sh` et stockés dans `.env`, **ignoré par git**.
+Secrets are generated by `up.sh` and stored in `.env`, **which is ignored by
+git**.
 
-| Cible | Identifiant | Mot de passe |
+| Target | Username | Password |
 |---|---|---|
-| Tableau de bord Wazuh | `admin` | `WAZUH_DASHBOARD_PASSWORD` dans `.env` |
-| Indexer | `admin` | `WAZUH_INDEXER_PASSWORD` dans `.env` |
+| Wazuh dashboard | `admin` | `WAZUH_DASHBOARD_PASSWORD` in `.env` |
+| Indexer | `admin` | `WAZUH_INDEXER_PASSWORD` in `.env` |
 | fleet-app | `agent1`, `admin1`, `gestionnaire1`, `auditeur1`, `direction1` | `motdepasseagent`, `motdepasseadmin`, … |
 
-Les comptes de l'application viennent du jeu de données de démonstration
-(`fleet-app/database/seed.py`) : 15 véhicules, 5 utilisateurs, 5 rôles, 3
-alertes. La base est régénérée au démarrage, elle n'est pas versionnée.
+The application accounts come from the demo dataset
+(`fleet-app/database/seed.py`): 15 vehicles, 5 users, 5 roles, 3 alerts. The
+database is regenerated on startup and is not versioned.
 
-## Ce qui n'a pas été validé
+## Out of scope
 
-Par transparence, sur ce qui a été construit et démontré :
+- **pfSense is not containerised.** A firewall is a network appliance, not a
+  process. It belongs to the network layer that runs beneath this stack.
+- **No Kali services are provided.** Intrusion testing is not part of the
+  product: use whatever machine you have to trigger the alerts. Rule `100002`
+  depends only on the application.
 
-- **L'indexation complète fonctionne** : la chaîne alertes a été vérifiée de bout
-  en bout, événement applicatif, règle, corrélation, indexation, tableau de bord.
-- **FreeIPA n'a jamais été opérationnel.** L'annuaire n'a pas obtenu d'adresse IP
-  dans le laboratoire d'origine et ses services sont restés arrêtés. Le mode
-  conteneurisé est fourni mais n'a pas été validé de bout en bout. Le
-  déploiement FreeIPA du laboratoire d'origine, qui lui l'était, est décrit dans
-  `docs/GUIDE_IMPLEMENTATION.md`.
-- **pfSense n'est pas conteneurisé.** Un pare-feu est par nature un équipement
-  réseau à bord, pas un processus. Sa configuration reste dans
-  `docs/GUIDE_IMPLEMENTATION.md`.
-- **Aucun service Kali n'est fourni.** Les tests d'intrusion font partie du
-  périmètre pédagogique mais pas du produit : utilisez la machine de votre choix
-  pour déclencher les alertes, la règle `100002` ne dépend que de
-  l'application.
-
-## Organisation du dépôt
+## Repository layout
 
 ```
-compose.yaml              les 5 services, réseau et volumes
-.env.example              modèle de configuration, à copier en .env
-fleet-app/                application Flask (Dockerfile, code, tests)
-  Dockerfile              image autonome : base créée et peuplée au démarrage
-  database/seed.py        jeu de données de démonstration
-  services/parc.py        émission syslog vers le SIEM
-  services/security.py    authentification locale ou LDAP
+compose.yaml              the 5 services, network and volumes
+.env.example              configuration template, copy to .env
+fleet-app/                Flask application (Dockerfile, code, tests)
+  Dockerfile              self-contained image: database created and seeded on boot
+  database/seed.py        demo dataset
+  services/parc.py        syslog emission to the SIEM
+  services/security.py    local or LDAP authentication
+  services/rapports.py    fuel consumption reporting
 scripts/
-  up.sh                   remontage complet
-  verify.sh               contrôle de santé
-  down.sh                 arrêt
-  configure-wazuh.sh      règles, allowed-ips, chaîne Filebeat
-docs/
-  GUIDE_IMPLEMENTATION.md     déploiement du laboratoire d'origine, VM par VM
-  SOUTENANCE_RUNBOOK.md       déroulé de soutenance
-  presentation_soutenance.md  support de présentation
-  pfe-zero-trust-municipal-fleet.md   architecture détaillée
-  rapport-pfa-zero-trust-municipal-fleet.md  mémoire
+  up.sh                   full bring-up
+  verify.sh               health check
+  down.sh                 shutdown
+  configure-wazuh.sh      rules, allowed-ips, Filebeat pipeline
 ```
 
-## Licence etConfidentialité
+## License
 
-Projet de fin d'études. Les mots de passe, clés et identifiants de l'instance
-d'origine ont été retirés du dépôt. Ne versionnez jamais un fichier `.env`.
+Do not version a `.env` file under any circumstances.

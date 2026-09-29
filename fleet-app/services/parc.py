@@ -82,7 +82,7 @@ def creer_vehicule(donnees, utilisateur):
 
 
 def synthese_parc():
-    """Compteurs synthétiques du tableau de bord (fig:ch4-app-dashboard)."""
+    """Compteurs synthétiques du tableau de bord."""
     total = Vehicule.query.count()
     en_service = Vehicule.query.filter_by(statut="En service").count()
     en_maintenance = Vehicule.query.filter(

@@ -26,7 +26,7 @@ def verifier_stock(type_carburant, quantite):
 
 
 def creer_bon(donnees, utilisateur):
-    """Émission d'un bon de carburant (fig:ch4-app-bon)."""
+    """Émission d'un bon de carburant."""
     vehicule_id = donnees.get("vehicule_id")
     type_carburant = donnees.get("type_carburant", "Gasoil")
     quantite = float(donnees.get("quantite", 0))

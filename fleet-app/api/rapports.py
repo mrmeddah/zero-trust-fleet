@@ -1,4 +1,4 @@
-"""/api/rapports/consommation --- synthèse des consommations (tb:ch3-endpoints)."""
+"""/api/rapports/consommation --- synthèse des consommations."""
 from flask import Blueprint, request, jsonify
 
 from services.rapports import (

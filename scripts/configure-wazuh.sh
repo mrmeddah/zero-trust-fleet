@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 set -a; [[ -f .env ]] && . ./.env; set +a
 
-MANAGER=pfa-wazuh-manager
+MANAGER=zt-wazuh-manager
 [[ -z "$(podman ps -q -f name=$MANAGER 2>/dev/null)" ]] && {
   echo "  manager absent : lancez d'abord ./scripts/up.sh" >&2; exit 1; }
 

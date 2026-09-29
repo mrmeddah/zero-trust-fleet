@@ -1,6 +1,6 @@
-"""Jeu de données de démonstration (cohérent avec ch. II et ch. IV).
+"""Jeu de données de démonstration.
 
-Véhicules : immatriculations du type J200189, J200190, ... (format demandé).
+Véhicules : immatriculations séquentielles de type J200189, J200190, …
 Rôles : Administrateur, Gestionnaire, Agent, Direction, Auditeur.
 """
 import os

@@ -1,4 +1,4 @@
-"""/api/stock --- niveau des stocks (tb:ch3-endpoints)."""
+"""/api/stock --- niveau des stocks."""
 from flask import Blueprint, jsonify
 
 from models import Stock

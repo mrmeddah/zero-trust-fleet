@@ -1,11 +1,11 @@
-name: pfa-zero-trust-fleet
+name: zero-trust-fleet
 
 services:
 
   # ---------------------------------------------------------------- Wazuh
   wazuh-indexer:
     image: wazuh/wazuh-indexer:4.14.8
-    container_name: pfa-wazuh-indexer
+    container_name: zt-wazuh-indexer
     hostname: wazuh.indexer
     restart: unless-stopped
     environment:
@@ -30,7 +30,7 @@ services:
 
   wazuh-manager:
     image: wazuh/wazuh-manager:4.14.8
-    container_name: pfa-wazuh-manager
+    container_name: zt-wazuh-manager
     hostname: wazuh.manager
     restart: unless-stopped
     environment:
@@ -62,7 +62,7 @@ services:
 
   wazuh-dashboard:
     image: wazuh/wazuh-dashboard:4.14.8
-    container_name: pfa-wazuh-dashboard
+    container_name: zt-wazuh-dashboard
     hostname: wazuh.dashboard
     restart: unless-stopped
     environment:
@@ -93,7 +93,7 @@ services:
     build:
       context: ./fleet-app
       dockerfile: Dockerfile
-    container_name: pfa-fleet-app
+    container_name: zt-fleet-app
     hostname: fleet-app.municipal.local
     restart: unless-stopped
     environment:
@@ -128,7 +128,7 @@ services:
   #   podman compose --profile freeipa up -d
   freeipa:
     image: ${FREEIPA_IMAGE:-freeipa/freeipa-server:4.12}
-    container_name: pfa-freeipa
+    container_name: zt-freeipa
     hostname: freeipa.municipal.local
     restart: unless-stopped
     profiles: ["freeipa"]

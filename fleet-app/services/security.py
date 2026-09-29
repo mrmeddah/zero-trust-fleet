@@ -3,7 +3,7 @@ mutuelle par certificats (mTLS). Peut fonctionner en mode « disabled » (dével
 tests : base locale) ou en mode « enabled » (annuaire FreeIPA réel).
 
 La vérification des mots de passe est déléguée à FreeIPA par liaison LDAP (bind),
-conformément au chapitre IV : « vérification déléguée à FreeIPA ».
+par défaut, conformément à la politique de délégation des identifiants.
 """
 import ssl
 import logging
@@ -32,7 +32,7 @@ def verification_mtls(envi, require: bool):
     """Retourne le CN du client si un certificat valide est présent.
 
     En mode mTLS actif, l'absence de certificat client met fin à la requête
-    (refus au niveau TLS, conformément à la figure fig:ch4-app-login — un
+    (refus au niveau TLS, avant même d’atteindre l’application — un
     accès sans certificat est refusé avant toute présentation de la page).
     """
     cn = identifier_certificat(envi)
@@ -119,7 +119,7 @@ def besoin_session(fonction):
 def roles_requis(*roles):
     """Contrôle d'accès par rôle (moindre privilège).
 
-    Chaque ressource est associée aux rôles de tb:ch3-endpoints,
+    Chaque ressource est associée à des rôles,
     colonne « Rôle requis ».
     """
     def decorateur(fonction):

@@ -1,4 +1,4 @@
-"""Couche données --- diagramme de classes (tb:ch2-classes).
+"""Couche données --- modèles et schéma SQLAlchemy.
 
 Classes : Utilisateur, Role, Certificat, Vehicule, Affectation,
 BonCarburant, JournalAcces, Alerte (+ Stock pour les mouvements de carburant).

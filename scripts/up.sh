@@ -58,7 +58,7 @@ ok "conteneurs lances"
 
 info "Attente de l'indexer (demarrage froid : 1 a 3 minutes)"
 for i in $(seq 1 60); do
-  if podman exec pfa-wazuh-indexer curl -sk \
+  if podman exec zt-wazuh-indexer curl -sk \
       -u "${WAZUH_INDEXER_USER:-admin}:$(grep '^WAZUH_INDEXER_PASSWORD=' .env | cut -d= -f2-)" \
       https://localhost:9200/_cluster/health 2>/dev/null | grep -qE '"status":"(green|yellow)"'; then
     ok "indexer pret (${i}0 s)"
