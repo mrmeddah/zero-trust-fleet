@@ -9,7 +9,7 @@ The repository has **one goal: reproducibility.** Any compatible machine, one
 script, and the whole lab runs. Nothing is left to interpretation.
 
 ```bash
-git clone https://github.com/<you>/zero-trust-fleet.git
+git clone https://github.com/mrmeddah/zero-trust-fleet.git
 cd zero-trust-fleet
 cp .env.example .env
 ./scripts/up.sh
